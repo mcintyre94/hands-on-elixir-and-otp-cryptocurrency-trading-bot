@@ -389,13 +389,18 @@ This creates a two-way link between the streamer and the naive app. In the next 
 
 ### Access details to Binance
 
-Inside the main config of our umbrella project we need to define access details for our Binance account:
+We can pass our Binance account access details to our code using environment variables. Create a new `config/runtime.exs` at the root of our umbrella project:
 
 ```{r, engine = 'elixir', eval = FALSE}
+# /config/runtime.exs
+import Config
+
 config :binance,
-  api_key: "YOUR-API-KEY-HERE",
-  secret_key: "YOUR-SECRET-KEY-HERE"
+  api_key: System.get_env("BINANCE_API_KEY"),
+  secret_key: System.get_env("BINANCE_SECRET_KEY")
 ```
+
+Note that we use `runtime.exs` instead of `config.exs` so that the environment variables are read at runtime and not compile time.
 
 *Important note*: To be able to run the below test and perform real trades, a Binance account is required with a balance of at least 20 USDT. In the 4th chapter, we will focus on creating a `BinanceMock` that will allow us to run our bot *without* the requirement for a real Binance account. You don't need to test run it now if you don't need/want to have an account.
 
@@ -404,6 +409,8 @@ config :binance,
 Now it's time to give our implementation a run for its money. Once again, to be able to do that you will need to have at least 20 USDT tokens in your Binance's wallet and you will lose just under 0.5% of your USDTs(as "expected profit" is below 0 to quickly showcase the full trade cycle) in the following test:
 
 ```{r, engine = 'bash', eval = FALSE}
+$ export BINANCE_API_KEY="YOUR-API-KEY-HERE"
+$ export BINANCE_SECRET_KEY="YOUR-SECRET-KEY-HERE"
 $ iex -S mix
 ...
 iex(1)> Naive.Trader.start_link(%{symbol: "XRPUSDT", profit_interval: "-0.01"})
